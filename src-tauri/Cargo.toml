@@ -1,9 +1,9 @@
 [package]
-name = "Job Hunter Application Tracker"
+name = "job-hunter-tracker"
 version= "1.0.1"
 description = "Job Hunter Application Tracker"
 authors = ["Bruce Royce"]
-edition = "2026"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
