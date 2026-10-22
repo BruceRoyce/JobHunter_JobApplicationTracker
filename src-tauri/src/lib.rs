@@ -1,26 +1,42 @@
+use std::sync::Mutex;
+use tauri::Manager;
+use tauri_plugin_shell::process::CommandChild;
 use tauri_plugin_shell::ShellExt;
 
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
+
+// 1. Create a wrapper struct to hold our sidecar process in a thread-safe way
+struct BackendProcess(Mutex<Option<CommandChild>>);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        // the shell plugin
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        // opener plugin
         .plugin(tauri_plugin_opener::init())
-        // setup hook to spawn the sidecar
         .setup(|app| {
-            // "server" matches the base name you put in externalBin in tauri.config.json
             let sidecar_command = app.shell().sidecar("server").unwrap();
-            // Spawn the Deno backend in the background
-            let (_rx, _child) = sidecar_command
+            
+            let (_rx, child) = sidecar_command
                 .spawn()
                 .expect("Failed to start Deno backend");
 
+            // 2. Save the running child process into Tauri's managed state
+            app.manage(BackendProcess(Mutex::new(Some(child))));
+
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+
+    // 3. Take over the run loop to intercept the app closing event
+    app.run(|app_handle, event| {
+        if let tauri::RunEvent::Exit = event {
+            // Retrieve the process from state and cleanly kill it
+            let state = app_handle.state::<BackendProcess>();
+            let mut child = state.0.lock().unwrap();
+            if let Some(c) = child.take() {
+                let _ = c.kill(); 
+            }
+        }
+    });
 }
