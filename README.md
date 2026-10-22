@@ -1,6 +1,8 @@
-# Job Hunter (Tracker)
+# Job Hunter Application Tracker
 
-A calm, secure desktop tracker for the jobs you have applied to — or intend to.
+v1.0.1
+
+A calm, secure desktop tracker for the jobs you have applied to - or intend to.
 Built as a **Tauri v2** application with a **Deno + SQLite** backend (running as a native sidecar) and a **Vite + React + TypeScript + Tailwind + Zustand** frontend.
 
 ## Requirements
