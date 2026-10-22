@@ -1,0 +1,22 @@
+{
+  "tasks": {
+    "setup": "deno install",
+    "check": "deno check server/main.ts && deno run -A npm:typescript/tsc --noEmit -p .",
+
+    "dev:backend": "deno run --watch --allow-net --allow-read --allow-write --allow-env --allow-sys server/main.ts",
+    "dev:frontend": "deno run -A npm:vite",
+    "dev": "deno run -A npm:concurrently \"deno task dev:backend\" \"deno task dev:frontend\"",
+
+    "build": "deno run -A npm:vite build",
+
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env --allow-sys dist/server/main.ts",
+    "compile:windows": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-sys --target x86_64-pc-windows-msvc --output dist/job-hunter.exe dist/server/main.ts",
+    "smoke": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --allow-sys scripts/smoke.ts"
+  },
+  "fmt": {
+    "lineWidth": 120,
+    "exclude": ["dist/", "data/", "node_modules/"]
+  },
+  "lint": { "exclude": ["dist/", "data/"] },
+  "exclude": ["dist/", "data/"]
+}

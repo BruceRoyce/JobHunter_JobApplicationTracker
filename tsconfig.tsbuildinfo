@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/api.ts","./src/format.ts","./src/main.tsx","./src/store.ts","./src/types.ts","./src/components/jobcard.tsx","./src/components/jobform.tsx","./src/components/listpane.tsx","./src/components/logo.tsx","./src/components/markdown.tsx","./src/components/ui.tsx","./vite.config.ts"],"version":"5.9.3"}
