@@ -1,39 +1,39 @@
-# Job Hunter Tracker: Privacy Policy
+# Privacy Policy
 
-_Last updated: 22 October 2026_
+Job Hunter Tracker is a free desktop application for Windows, published by Bruce Royce. This Privacy Policy explains how your information is handled when you use it.
 
-Job Hunter Tracker is a free desktop app for Windows published by Bruce Royce.
+## 1. Local Processing
 
-## What the app stores
+The application is designed to operate entirely on your machine. All data, settings and files you provide, such as job applications, employer or agency details, contact names, salaries, notes, CVs, cover letters and job adverts, are stored and processed only on your device, in `%APPDATA%\job-hunter-tracker\data`. We do not transmit, collect or store your personal information on external servers.
 
-The app stores the job applications you enter, such as job titles, employer or agency names, contact names, salary, dates, statuses and notes. It also stores the files you attach, such as CVs, cover letters and job adverts.
+The application runs a small helper process that listens only on your own computer (`127.0.0.1`). It cannot be reached from the network.
 
-Everything is saved only on your computer, in `%APPDATA%\job-hunter-tracker\data`. Nothing is uploaded to the developer or to any other service.
+## 2. No Account Required
 
-## Network use
+You do not need to create an account, provide an email address or log in to use the application.
 
-When you save a record with a job advert web address, the app downloads that one page or file once, directly from the website you entered, so it can keep a copy on your PC. That website will see a normal web request from your computer.
+## 3. Limited Internet Access
 
-The app has no accounts, analytics, telemetry, advertising or tracking, and it does not send your data anywhere.
+The application uses the internet for only one feature:
 
-## Local helper process
+- **Job Advert Archiving:** if you provide the URL of a job advertisement, the application fetches that specific web page or file once, so it can keep a frozen copy for your personal records. The website you enter will see a normal web request from your computer.
 
-The app runs a small helper process that listens only on your own computer (`127.0.0.1`) and cannot be reached from the network.
+The application performs no other network requests, and has no telemetry, analytics, advertising or tracking.
 
-## Your control over your data
+## 4. Your Data, Your Control
 
-- You can export your records to CSV at any time.
-- To delete your data, remove the folder `%APPDATA%\job-hunter-tracker`.
-- Uninstalling the app leaves this folder in place so that your records are not lost by accident.
+Because all data stays on your machine, you have complete control over it. You can export your records to CSV at any time. Uninstalling the application does not delete your data folder, so your records are not lost by accident. To permanently remove all your data, delete the `%APPDATA%\job-hunter-tracker` folder.
 
-## Children
+## 5. Children
 
-The app is not directed at children and collects no data from anyone.
+The application is not directed at children and collects no data from anyone.
 
-## Changes to this policy
+## 6. Changes to This Policy
 
-Any changes will be published on this page with a new "Last updated" date.
+If a future update introduces features that need broader network access or any data collection, this policy will be updated, and your consent will be requested before those features are turned on. Changes will be published on this page with a new "Last updated" date.
 
-## Contact
+## 7. Contact
 
-Please raise questions or concerns at <https://github.com/BruceRoyce/JobHunter_JobApplicationTracker/issues>.
+Questions about this policy can be raised at https://github.com/BruceRoyce/JobHunter_JobApplicationTracker/issues
+
+**Last updated:** 22 October 2026
