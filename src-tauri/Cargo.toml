@@ -1,6 +1,6 @@
 [package]
 name = "Job Hunter Application Tracker"
-version= "1.0.1",
+version= "1.0.1"
 description = "Job Hunter Application Tracker"
 authors = ["Bruce Royce"]
 edition = "2026"
