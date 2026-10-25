@@ -230,9 +230,10 @@ Deno.serve(
     port: PORT,
     hostname: HOSTNAME,
     onListen: ({ hostname, port }) => {
-      console.log(
-        `Job Hunter (Tracker) running at http://${hostname === "0.0.0.0" ? "localhost" : hostname}:${port}`,
-      );
+      const host = hostname === "0.0.0.0" ? "127.0.0.1" : hostname;
+      // One stable line so the Tauri shell can learn an ephemeral port (PORT=0).
+      const line = `JOB_HUNTER_READY http://${host}:${port}\n`;
+      Deno.stdout.writeSync(new TextEncoder().encode(line));
       console.log(`Data folder: ${DATA_DIR}`);
     },
   },

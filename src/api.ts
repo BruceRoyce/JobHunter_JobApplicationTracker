@@ -10,7 +10,12 @@ export class ApiError extends Error {
   }
 }
 
-const API_BASE = import.meta.env.DEV ? "" : "http://127.0.0.1:8787";
+// Dev uses the Vite proxy (relative URLs). Production is set from the sidecar's ready line.
+let apiBase = "";
+
+export function setApiBase(url: string) {
+  apiBase = url.replace(/\/$/, "");
+}
 
 async function handle<T>(res: Response): Promise<T> {
   let body: unknown = null;
@@ -59,22 +64,24 @@ export const api = {
       dir: params.dir,
     });
     if (params.status) q.set("status", params.status);
-    return request<JobList>(`${API_BASE}/api/jobs?${q}`);
+    return request<JobList>(`${apiBase}/api/jobs?${q}`);
   },
   create(form: FormData) {
-    return request<SaveResult>(`${API_BASE}/api/jobs`, {
+    return request<SaveResult>(`${apiBase}/api/jobs`, {
       method: "POST",
       body: form,
     });
   },
   update(id: number, form: FormData) {
-    return request<SaveResult>(`${API_BASE}/api/jobs/${id}`, {
+    return request<SaveResult>(`${apiBase}/api/jobs/${id}`, {
       method: "PUT",
       body: form,
     });
   },
   fileUrl(id: number, kind: "cv" | "cover-letter" | "advert") {
-    return `${API_BASE}/api/jobs/${id}/files/${kind}`;
+    return `${apiBase}/api/jobs/${id}/files/${kind}`;
   },
-  exportUrl: "/api/export.csv",
+  get exportUrl() {
+    return `${apiBase}/api/export.csv`;
+  },
 };
