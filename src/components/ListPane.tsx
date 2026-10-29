@@ -2,6 +2,7 @@ import { api } from "../api";
 import { useStore } from "../store";
 import { STATUSES, type SortKey, type Status } from "../types";
 import { JobCard } from "./JobCard";
+import { JobSearch } from "./JobSearch";
 import { Button, Icon } from "./ui";
 
 const SORT_LABELS: Record<SortKey, string> = {
@@ -33,6 +34,8 @@ export function ListPane() {
           <Icon.Download className="size-3.5" /> Export All
         </a>
       </div>
+
+      <JobSearch />
 
       <div className="mt-4 flex flex-wrap items-end gap-3 rounded-md border border-line bg-surface px-4 py-3">
         <div>

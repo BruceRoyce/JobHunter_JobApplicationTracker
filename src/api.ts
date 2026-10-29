@@ -1,4 +1,4 @@
-import type { JobList, SaveResult, SortDir, SortKey } from "./types";
+import type { Job, JobList, SaveResult, SearchResult, SortDir, SortKey } from "./types";
 
 export class ApiError extends Error {
   constructor(
@@ -38,11 +38,16 @@ async function handle<T>(res: Response): Promise<T> {
   return body as T;
 }
 
+function isAbort(e: unknown): boolean {
+  return e instanceof Error && e.name === "AbortError";
+}
+
 async function request<T>(input: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
     res = await fetch(input, init);
-  } catch {
+  } catch (e) {
+    if (isAbort(e)) throw e;
     throw new ApiError(
       "Cannot reach the Job Hunter server. Check it is running, then try again.",
       0,
@@ -66,6 +71,13 @@ export const api = {
     if (params.status) q.set("status", params.status);
     return request<JobList>(`${apiBase}/api/jobs?${q}`);
   },
+  search(q: string, signal?: AbortSignal) {
+    const params = new URLSearchParams({ q });
+    return request<SearchResult>(`${apiBase}/api/jobs/search?${params}`, { signal });
+  },
+  get(id: number) {
+    return request<Job>(`${apiBase}/api/jobs/${id}`);
+  },
   create(form: FormData) {
     return request<SaveResult>(`${apiBase}/api/jobs`, {
       method: "POST",
@@ -76,6 +88,16 @@ export const api = {
     return request<SaveResult>(`${apiBase}/api/jobs/${id}`, {
       method: "PUT",
       body: form,
+    });
+  },
+  addEvent(
+    id: number,
+    event: { status: string; event_date: string; description: string },
+  ) {
+    return request<SaveResult>(`${apiBase}/api/jobs/${id}/events`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(event),
     });
   },
   fileUrl(id: number, kind: "cv" | "cover-letter" | "advert") {

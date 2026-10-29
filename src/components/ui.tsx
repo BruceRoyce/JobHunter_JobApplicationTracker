@@ -223,5 +223,6 @@ export const Icon = {
   Moon: svg(<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />),
   Arrow: svg(<path d="M12 5v14M6 13l6 6 6-6" />),
   X: svg(<path d="M6 6l12 12M18 6L6 18" />),
+  Search: svg(<><circle cx="11" cy="11" r="6.5" /><path d="M16.5 16.5L20 20" /></>),
   Alert: svg(<><path d="M12 9v4M12 17h.01" /><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /></>),
 };

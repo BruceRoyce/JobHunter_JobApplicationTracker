@@ -21,6 +21,7 @@ export interface StatusEvent {
   id: number;
   status: Status;
   event_date: string;
+  description: string | null;
   created_at: string;
 }
 
@@ -63,4 +64,20 @@ export interface JobList {
 export interface SaveResult {
   job: Job;
   warnings: string[];
+}
+
+export type SearchKind = "employer" | "role";
+
+export interface SearchHit {
+  job_id: number;
+  kind: SearchKind;
+  job_title: string;
+  employer_name: string | null;
+  created_at: string;
+  status: Status;
+}
+
+export interface SearchResult {
+  items: SearchHit[];
+  truncated: boolean;
 }

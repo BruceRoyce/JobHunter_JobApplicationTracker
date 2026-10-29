@@ -1,0 +1,1 @@
+- Never add any dependency without asking me to approve it first.

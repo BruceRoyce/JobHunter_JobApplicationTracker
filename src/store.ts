@@ -36,6 +36,7 @@ interface State {
   openEdit: (job: Job) => void;
   closeForm: () => void;
   afterSave: (job: Job, warnings: string[], verb: "saved" | "updated") => void;
+  applyJob: (job: Job) => void;
   toggleTheme: () => void;
   dismissNotice: (id: number) => void;
 }
@@ -114,6 +115,18 @@ export const useStore = create<State>((set, get) => ({
     for (const n of notices) {
       if (n.tone === "success") setTimeout(() => get().dismissNotice(n.id), 4000);
     }
+  },
+  applyJob(job) {
+    const { status, items, total, form } = get();
+    const visible = !status || job.status === status;
+    set({
+      items: visible
+        ? items.map((j) => (j.id === job.id ? job : j))
+        : items.filter((j) => j.id !== job.id),
+      total: visible ? total : Math.max(0, total - 1),
+      highlightId: job.id,
+      form: form.kind === "edit" && form.job.id === job.id ? { kind: "edit", job } : form,
+    });
   },
   toggleTheme() {
     const next: Theme = get().theme === "dark" ? "light" : "dark";

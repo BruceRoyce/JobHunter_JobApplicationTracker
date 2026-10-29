@@ -168,3 +168,15 @@ input[type="file"].input::file-selector-button {
 .prose-notes strong { color: var(--c-ink); font-weight: 600; }
 
 .tabular { font-variant-numeric: tabular-nums; }
+
+.menu-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-line-strong) transparent;
+}
+.menu-scroll::-webkit-scrollbar { width: 8px; }
+.menu-scroll::-webkit-scrollbar-thumb {
+  background: var(--c-line-strong);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}

@@ -51,6 +51,7 @@ export function openDb(path: string): DatabaseSync {
       job_id      INTEGER NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
       status      TEXT    NOT NULL CHECK (status IN ('Applied','Interested','Going to interview','unsuccessful','successful','Closed')),
       event_date  TEXT    NOT NULL,
+      description TEXT,
       created_at  TEXT    NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_events_job ON status_events(job_id, event_date);
@@ -69,6 +70,10 @@ export function openDb(path: string): DatabaseSync {
     END;
     INSERT OR IGNORE INTO schema_meta(key, value) VALUES ('version', '1');
   `);
+  const eventCols = db.prepare("PRAGMA table_info(status_events)").all() as { name: string }[];
+  if (!eventCols.some((c) => c.name === "description")) {
+    db.exec("ALTER TABLE status_events ADD COLUMN description TEXT");
+  }
   return db;
 }
 

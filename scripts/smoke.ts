@@ -121,6 +121,27 @@ try {
   const filt = await (await fetch(`${BASE}/api/jobs?status=Interested`)).json();
   check("filter by status", filt.total === 1 && filt.items[0].status === "Interested");
 
+  const byRole = await (await fetch(`${BASE}/api/jobs/search?q=analyst`)).json();
+  check(
+    "search roles, newest first",
+    byRole.items.length === 2 &&
+      byRole.items.every((h: { kind: string }) => h.kind === "role") &&
+      byRole.items[0].job_title === "Analyst" &&
+      byRole.items[1].job_title === "Senior Data Analyst",
+    byRole.items.map((h: { job_title: string }) => h.job_title).join(" | "),
+  );
+  const byEmployer = await (await fetch(`${BASE}/api/jobs/search?q=acme`)).json();
+  check(
+    "search employer, case-insensitive",
+    byEmployer.items.length === 1 && byEmployer.items[0].kind === "employer" && byEmployer.items[0].employer_name === "Acme Ltd",
+  );
+  const senior = await (await fetch(`${BASE}/api/jobs/search?q=Senior`)).json();
+  check("role-only when the employer does not match", senior.items.length === 1 && senior.items[0].kind === "role");
+  const blank = await (await fetch(`${BASE}/api/jobs/search?q=%20`)).json();
+  check("blank search is empty", blank.items.length === 0 && blank.truncated === false);
+  const literal = await (await fetch(`${BASE}/api/jobs/search?q=${encodeURIComponent("%")}`)).json();
+  check("percent is not a wildcard", literal.items.length === 0);
+
   // 6. Update: change status, edit event date, replace CV, try to replace advert (must be refused).
   const advertBefore = await Deno.readFile(`${tmp}/files/${job.folder}/Job-advert.pdf`);
   const up = new FormData();

@@ -79,6 +79,7 @@ Frozen web pages are served with a `sandbox` Content-Security-Policy so their sc
 | Method | Path                                                                        |                                                                      |
 | ------ | --------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | GET    | `/api/jobs?sort=updated\|title\|name\|salary&dir=asc\|desc&status=…&page=1` | paged list (50) with events                                          |
+| GET    | `/api/jobs/search?q=…`                                                      | employer-name and job-title matches, newest added first              |
 | POST   | `/api/jobs`                                                                 | create (multipart: fields + `cv`, `cover_letter`, optional `advert`) |
 | GET    | `/api/jobs/:id`                                                             | one record                                                           |
 | PUT    | `/api/jobs/:id`                                                             | update (multipart; `events` = JSON `[{id?, status, event_date}]`)    |

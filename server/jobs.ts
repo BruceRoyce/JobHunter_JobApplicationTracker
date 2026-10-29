@@ -35,6 +35,7 @@ export interface StatusEvent {
   id: number;
   status: string;
   event_date: string;
+  description: string | null;
   created_at: string;
 }
 
@@ -199,13 +200,19 @@ function eventsFor(db: DatabaseSync, ids: number[]): Map<number, StatusEvent[]> 
   if (!ids.length) return map;
   const rows = db
     .prepare(
-      `SELECT id, job_id, status, event_date, created_at FROM status_events
+      `SELECT id, job_id, status, event_date, description, created_at FROM status_events
        WHERE job_id IN (${ids.map(() => "?").join(",")}) ORDER BY event_date ASC, id ASC`,
     )
     .all(...ids) as Row[];
   for (const r of rows) {
     const list = map.get(r.job_id) ?? [];
-    list.push({ id: r.id, status: r.status, event_date: r.event_date, created_at: r.created_at });
+    list.push({
+      id: r.id,
+      status: r.status,
+      event_date: r.event_date,
+      description: r.description ?? null,
+      created_at: r.created_at,
+    });
     map.set(r.job_id, list);
   }
   return map;
@@ -262,6 +269,53 @@ export function listJobs(db: DatabaseSync, params: URLSearchParams) {
     sort: sortKey,
     dir: dir.toLowerCase(),
   };
+}
+
+const MAX_SEARCH_HITS = 200;
+
+export interface SearchHit {
+  job_id: number;
+  kind: "employer" | "role";
+  job_title: string;
+  employer_name: string | null;
+  created_at: string;
+  status: string;
+}
+
+/** Substring match on employer name and job title. `%`, `_`, and `\` are matched literally. */
+function containsPattern(q: string): string {
+  return `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+}
+
+export function searchJobs(db: DatabaseSync, rawQuery: string) {
+  const q = rawQuery.trim().slice(0, 200);
+  if (!q) return { items: [] as SearchHit[], truncated: false };
+  const pattern = containsPattern(q);
+  const rows = db
+    .prepare(
+      `SELECT id, job_title, employer_name, created_at, status, kind FROM (
+         SELECT id, job_title, employer_name, created_at, status, 'employer' AS kind
+         FROM jobs
+         WHERE employer_name LIKE ? ESCAPE '\\'
+         UNION ALL
+         SELECT id, job_title, employer_name, created_at, status, 'role' AS kind
+         FROM jobs
+         WHERE job_title LIKE ? ESCAPE '\\'
+       ) AS hits
+       ORDER BY created_at DESC, id DESC, kind ASC
+       LIMIT ?`,
+    )
+    .all(pattern, pattern, MAX_SEARCH_HITS + 1) as Row[];
+  const truncated = rows.length > MAX_SEARCH_HITS;
+  const items: SearchHit[] = (truncated ? rows.slice(0, MAX_SEARCH_HITS) : rows).map((r) => ({
+    job_id: r.id as number,
+    kind: r.kind === "employer" ? "employer" : "role",
+    job_title: r.job_title as string,
+    employer_name: (r.employer_name as string | null) ?? null,
+    created_at: r.created_at as string,
+    status: r.status as string,
+  }));
+  return { items, truncated };
 }
 
 // ---------- create ----------
@@ -497,6 +551,38 @@ export async function updateJob(db: DatabaseSync, id: number, fd: FormData) {
     if (s.old && s.old !== s.final) await Deno.remove(join(folderPath, s.old)).catch(() => {});
   }
   return { job: getJob(db, id), warnings };
+}
+
+const EVENT_DESCRIPTION_MAX = 280;
+
+export function addStatusEvent(db: DatabaseSync, id: number, body: unknown) {
+  getRow(db, id);
+  const b = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
+  const status = String(b.status ?? "");
+  const event_date = String(b.event_date ?? "");
+  const errors: Record<string, string> = {};
+  if (!(STATUSES as readonly string[]).includes(status)) errors.status = "Choose an event type.";
+  if (!isIsoDate(event_date)) errors.event_date = "Enter a valid date.";
+  let description: string | null = null;
+  if (b.description != null && String(b.description).trim() !== "") {
+    description = String(b.description).trim();
+    if (description.length > EVENT_DESCRIPTION_MAX) {
+      errors.description = `Keep the description to ${EVENT_DESCRIPTION_MAX} characters.`;
+    }
+  }
+  if (Object.keys(errors).length) throw new HttpError(422, "Please correct the event.", errors);
+
+  const now = nowIso();
+  tx(db, () => {
+    db.prepare(
+      "INSERT INTO status_events (job_id, status, event_date, description, created_at) VALUES (?,?,?,?,?)",
+    ).run(id, status, event_date, description, now);
+    const latest = db
+      .prepare("SELECT status FROM status_events WHERE job_id = ? ORDER BY event_date DESC, id DESC LIMIT 1")
+      .get(id) as Row;
+    db.prepare("UPDATE jobs SET status = ?, updated_at = ? WHERE id = ?").run(latest.status, now, id);
+  });
+  return { job: getJob(db, id), warnings: [] as string[] };
 }
 
 // ---------- files & export ----------

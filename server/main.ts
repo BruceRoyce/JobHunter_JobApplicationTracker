@@ -1,11 +1,13 @@
 import { openDb, STATUSES } from "./db.ts";
 import {
+  addStatusEvent,
   createJob,
   exportCsv,
   filePathFor,
   getJob,
   HttpError,
   listJobs,
+  searchJobs,
   updateJob,
 } from "./jobs.ts";
 import { DATA_DIR, DB_PATH, FILES_DIR, PUBLIC_DIR } from "./paths.ts";
@@ -158,6 +160,10 @@ async function route(req: Request): Promise<Response> {
       return json(await createJob(db, await readForm(req)), 201);
   }
 
+  if (p === "/api/jobs/search" && m === "GET") {
+    return json(searchJobs(db, url.searchParams.get("q") ?? ""));
+  }
+
   if (p === "/api/export.csv" && m === "GET") {
     const stamp = todayIso();
     return new Response(exportCsv(db), {
@@ -171,6 +177,17 @@ async function route(req: Request): Promise<Response> {
         ...SECURITY_HEADERS,
       },
     });
+  }
+
+  const eventPost = /^\/api\/jobs\/(\d+)\/events$/.exec(p);
+  if (eventPost && m === "POST") {
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      throw new HttpError(400, "The event could not be read.");
+    }
+    return json(addStatusEvent(db, Number(eventPost[1]), body), 201);
   }
 
   const one = /^\/api\/jobs\/(\d+)$/.exec(p);
